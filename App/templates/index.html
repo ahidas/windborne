@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Map with Slider</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #slider-value {
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .map-box {
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+        }
+
+        iframe, .map-box > div {
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+
+        button {
+            padding: 6px 12px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Windborne Balloon Tracker</h2>
+
+<div class="slider-container">
+    <label for="rangeSlider">Balloon Range:</label>
+    <input type="range" id="rangeSlider" min="0" max="1000" value="{{ initial_value|default(500) }}">
+    <span id="slider-value">{{ initial_value|default(500) }}</span>
+</div>
+
+<div class="slider-container">
+    <label for="hourSlider">Hours ago:</label>
+    <input type="range" id="hourSlider" min="0" max="23" value="{{ initial_hour|default(0) }}">
+    <span id="hour-value">{{ initial_hour|default(0) }}</span>
+</div>
+
+    <label>
+        <input type="checkbox" id="jackToggle" {% if jack_enabled %}checked{% endif %}>
+        Include Jack in the Box locations
+    </label>
+
+
+<div class="slider-container">
+    <button onclick="submitSlider()">Update</button>
+</div>
+
+    {% if error_message %}
+        <div style="color: red; text-align: center; margin-bottom: 20px;">
+            ⚠️ {{ error_message }}
+        </div>
+    {% endif %}
+    <div class="map-box" id="map">
+        {{ map_html|safe }}
+    </div>
+</div>
+
+<script>
+    const rangeSlider = document.getElementById('rangeSlider');
+    const sliderValue = document.getElementById('slider-value');
+
+    const hourSlider = document.getElementById('hourSlider');
+    const hourValue = document.getElementById('hour-value');
+
+    const jackToggle = document.getElementById('jackToggle');
+
+    rangeSlider.addEventListener('input', () => {
+        sliderValue.textContent = rangeSlider.value;
+    });
+
+    hourSlider.addEventListener('input', () => {
+        hourValue.textContent = hourSlider.value;
+    });
+
+    function submitSlider() {
+        const range = rangeSlider.value;
+        const hour = hourSlider.value;
+        const jack = jackToggle.checked ? 1 : 0;
+        window.location.href = `/?value=${range}&hour=${hour}&jack=${jack}`;
+    }
+</script>
+
+
+</body>
+</html>
