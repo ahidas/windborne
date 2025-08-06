@@ -9,6 +9,7 @@ folium==0.20.0
 geographiclib==2.0
 geopandas==1.1.1
 geopy==2.4.1
+gunicorn==23.0.0
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.6
