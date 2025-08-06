@@ -260,5 +260,5 @@ def index():
     map_html = m._repr_html_()
     return render_template("index.html", map_html=map_html, initial_value=max_range, initial_hour=hour_value, error_message=None,jack_enabled=jack_enabled)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# if __name__ == "__main__":
+#     app.run(debug=True)
