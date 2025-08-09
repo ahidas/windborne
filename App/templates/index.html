@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Map with Slider</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windborne Satellite Network Analyzer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23007BFF'/><circle cx='16' cy='16' r='8' fill='white'/><circle cx='16' cy='16' r='3' fill='%23007BFF'/></svg>" type="image/svg+xml">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,14 +16,71 @@
             align-items: center;
         }
 
-        .container {
-            max-width: 900px;
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
             width: 100%;
+        }
+        
+        .container {
+            flex: 1;
             background: white;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+        
+        .sidebar {
+            width: 350px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .sidebar h3 {
+            color: #007BFF;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .sidebar h4 {
+            color: #333;
+            margin: 15px 0 8px 0;
+            font-size: 14px;
+        }
+        
+        .sidebar p, .sidebar li {
+            font-size: 13px;
+            line-height: 1.4;
+            margin: 5px 0;
+            color: #555;
+        }
+        
+        .sidebar ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+        }
+        
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid black;
+        }
+        
+        .blue { background-color: blue; }
+        .red { background-color: red; }
+        .hq-icon { background: url('/static/windborn.png') center/cover; width: 20px; height: 20px; }
 
         h2 {
             text-align: center;
@@ -67,10 +126,64 @@
         button:hover {
             background-color: #0056b3;
         }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #007BFF;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007BFF;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .url-share {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            word-break: break-all;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
 
+<div class="main-container">
 <div class="container">
     <h2>Windborne Balloon Tracker</h2>
 
@@ -88,7 +201,7 @@
 
     <label>
         <input type="checkbox" id="jackToggle" {% if jack_enabled %}checked{% endif %}>
-        Include Jack in the Box locations
+        Include FCC Communication Relays
     </label>
 
 
@@ -96,14 +209,97 @@
     <button onclick="submitSlider()">Update</button>
 </div>
 
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading satellite network data...</p>
+    </div>
+    
     {% if error_message %}
         <div style="color: red; text-align: center; margin-bottom: 20px;">
             ⚠️ {{ error_message }}
         </div>
     {% endif %}
+    
     <div class="map-box" id="map">
         {{ map_html|safe }}
     </div>
+</div>
+
+<div class="sidebar">
+    <h3>🛰️ Windborne Satellite Network</h3>
+    
+    <h4>Purpose</h4>
+    <p>This tool visualizes which satellites are within communication range of Windborne's Palo Alto headquarters and shows optimal routing paths between network nodes.</p>
+    
+    <h4>Controls</h4>
+    <p><strong>Balloon Range (0-1000 km):</strong> Maximum communication distance between any two satellites. Determines network connectivity - higher values connect more distant satellites.</p>
+    
+    <p><strong>Hours Ago (0-23):</strong> Historical satellite positions from the Windborne treasure hunt API. Shows network topology at different times.</p>
+    
+    <p><strong>FCC Communication Relays:</strong> Includes FCC-registered antenna structures (earth stations, microwave towers) as realistic ground-based relay points for multi-hop satellite communication.</p>
+    
+    <h4>Map Legend</h4>
+    <div class="legend">
+        <div class="hq-icon"></div>
+        <span>Palo Alto HQ</span>
+    </div>
+    <div class="legend">
+        <div class="legend-dot blue"></div>
+        <span>Reachable satellites (click to show path)</span>
+    </div>
+    <div class="legend">
+        <div class="legend-dot red"></div>
+        <span>Unreachable satellites</span>
+    </div>
+    <div class="legend">
+        <div class="legend-dot blue" style="width: 8px; height: 8px;"></div>
+        <span>FCC relay stations (earth stations, microwave towers)</span>
+    </div>
+    
+    <h4>Technical Implementation</h4>
+    <p><strong>Algorithms:</strong></p>
+    <ul>
+        <li>3D Haversine distance calculation (accounts for altitude)</li>
+        <li>Dijkstra's shortest path algorithm for optimal routing</li>
+        <li>Graph connectivity analysis for network topology</li>
+    </ul>
+    
+    <p><strong>APIs & Data:</strong></p>
+    <ul>
+        <li>Windborne treasure hunt API (a.windbornesystems.com/treasure/)</li>
+        <li>FCC Antenna Structure Database (real communication facilities)</li>
+        <li>Natural Earth land boundary data (ne_110m_land.shp)</li>
+    </ul>
+    
+    <p><strong>Visualization:</strong></p>
+    <ul>
+        <li>Interactive Leaflet map with custom markers</li>
+        <li>Dynamic path visualization with tooltips</li>
+        <li>Real-time distance and routing information</li>
+    </ul>
+    
+    <h4>📊 Network Performance</h4>
+    {% if metrics %}
+    <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 12px;">
+        <p><strong>Satellites:</strong> {{ metrics.reachable_satellites }}/{{ metrics.total_satellites }} reachable</p>
+        <p><strong>Coverage:</strong> {{ metrics.coverage_percent }}% of network</p>
+        {% if metrics.total_fcc_relays > 0 %}
+        <p><strong>FCC Relays:</strong> {{ metrics.total_fcc_relays }} active</p>
+        {% endif %}
+        <p><strong>Average Hops:</strong> {{ metrics.avg_hops }}</p>
+        <p><strong>Range:</strong> {{ metrics.min_hops }}-{{ metrics.max_hops }} hops</p>
+        <p><strong>Avg Distance:</strong> {{ metrics.avg_distance }} km</p>
+        <p><strong>Max Distance:</strong> {{ metrics.max_distance }} km</p>
+    </div>
+    {% endif %}
+    
+    <h4>How to Use</h4>
+    <p>1. Adjust the range slider to see how communication distance affects network connectivity</p>
+    <p>2. Use the time slider to explore historical satellite positions</p>
+    <p>3. Click blue satellites to visualize optimal communication paths to HQ</p>
+    <p>4. FCC relay stations (smaller dots) provide intermediate hops for long-distance routing</p>
+</div>
+
 </div>
 
 <script>
@@ -124,11 +320,63 @@
     });
 
     function submitSlider() {
+        // Show loading indicator
+        document.getElementById('loading').classList.add('show');
+        document.getElementById('map').style.display = 'none';
+        
         const range = rangeSlider.value;
         const hour = hourSlider.value;
         const jack = jackToggle.checked ? 1 : 0;
         window.location.href = `/?value=${range}&hour=${hour}&jack=${jack}`;
     }
+    
+    // Copy URL to clipboard functionality
+    function copyCurrentURL() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            showMessage('URL copied to clipboard! Share this configuration.', 'success');
+        }).catch(() => {
+            prompt('Copy this URL to share:', url);
+        });
+    }
+    
+    // Show temporary message
+    function showMessage(message, type = 'info') {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+        messageDiv.textContent = message;
+        messageDiv.style.position = 'fixed';
+        messageDiv.style.top = '20px';
+        messageDiv.style.right = '20px';
+        messageDiv.style.zIndex = '1000';
+        messageDiv.style.maxWidth = '300px';
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
+    }
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+        // Hide loading on page load
+        document.getElementById('loading').classList.remove('show');
+        
+        // Set up URL parameters from current state
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('value')) {
+            rangeSlider.value = params.get('value');
+            sliderValue.textContent = params.get('value');
+        }
+        if (params.has('hour')) {
+            hourSlider.value = params.get('hour');
+            hourValue.textContent = params.get('hour');
+        }
+        if (params.has('jack')) {
+            jackToggle.checked = params.get('jack') === '1';
+        }
+    });
 </script>
 
 

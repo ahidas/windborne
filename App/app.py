@@ -83,15 +83,15 @@ def get_distances(max_distance, hour, jack_enabled):
         point.append(i)
         # point.append(False)
         i += 1
-    jack_start = -1
+    fcc_start = -1
     if(jack_enabled):
-        with open("jack_locations.json", "r") as f:
-            jack_locations = json.load(f)
-        jack_start = i
-        for loc in jack_locations:
-            lat = loc['lat']
-            lon = loc['lon']
-            alt = 0  # default altitude if not available
+        with open("fcc_facilities.json", "r") as f:
+            fcc_facilities = json.load(f)
+        fcc_start = i
+        for facility in fcc_facilities:
+            lat = facility['lat']
+            lon = facility['lon']
+            alt = facility.get('height', 0) / 3.281  # Convert feet to meters for altitude
             points.append([lat, lon, alt, i])
             i += 1
 
@@ -131,7 +131,7 @@ def get_distances(max_distance, hour, jack_enabled):
                     distances[neighbor] = (distances[current_node][0] + [current_node],distance)
                     heapq.heappush(priority_queue, (distance, neighbor))
         return distances
-    return (points, djikstra(neighbor_arr), jack_start)
+    return (points, djikstra(neighbor_arr), fcc_start)
 
 
 
@@ -149,86 +149,150 @@ def get_distances(max_distance, hour, jack_enabled):
 
 
 
-def add_markers(points, distances, jack_start, only_land = True):
+def add_markers(points, distances, fcc_start, only_land = True):
+    # Create minimal map with no markers initially
     m = folium.Map(location=[points[0][0], points[0][1]], tiles="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
         attr='&copy; <a href="https://carto.com/">CartoDB</a>', zoom_start=4, min_zoom=3, max_zoom=10)
+    
+    # Prepare marker data for JavaScript instead of adding to Folium
+    marker_data = []
+    for lat, lon, alt, id in points:
+        if math.isnan(lat) or math.isnan(lon):
+            continue
+        fcc_relay = (fcc_start >= 0 and id >= fcc_start)
+        reachable = True if id == 0 else (id < len(distances) and len(distances[id][0]) > 0)
+        
+        marker_info = {
+            'id': id,
+            'lat': lat,
+            'lon': lon,
+            'alt': alt,
+            'fcc_relay': fcc_relay,
+            'reachable': reachable,
+            'is_hq': (id == 0),
+            'distance': distances[id][1] if id < len(distances) and len(distances[id]) > 1 else 0
+        }
+        marker_data.append(marker_info)
+    
     m.get_root().html.add_child(folium.Element(f"""
     <script>
+        var markerData = {json.dumps(marker_data)};
+        var pathData = {{}};
+        var activePaths = {{}};
+        var pathDataLoaded = false;
+        var markersAdded = false;
+        
         document.addEventListener("DOMContentLoaded", function() {{
             window.myMap = {m.get_name()};
+            
+            // Load path data from API with better error handling
+            fetch('/api/paths')
+                .then(response => {{
+                    if (!response.ok) {{
+                        throw new Error(`HTTP ${{response.status}}: Failed to load path data`);
+                    }}
+                    return response.json();
+                }})
+                .then(data => {{
+                    pathData = data;
+                    pathDataLoaded = true;
+                    console.log('Path data loaded:', Object.keys(pathData).length, 'paths');
+                }})
+                .catch(error => {{
+                    console.error('Error loading path data:', error);
+                    pathDataLoaded = false;
+                    // Show user-friendly error
+                    setTimeout(() => {{
+                        if (typeof showMessage === 'function') {{
+                            showMessage('Unable to load routing data. Path visualization may be limited.', 'error');
+                        }}
+                    }}, 1000);
+                }});
+            
+            // Add markers via JavaScript instead of Folium
+            function addMarkers() {{
+                console.log('Adding', markerData.length, 'markers');
+                var reachableCount = 0;
+                markerData.forEach(function(marker) {{
+                    var color = marker.reachable ? 'blue' : 'red';
+                    var radius = marker.fcc_relay ? 3 : 5;
+                    if (marker.reachable) reachableCount++;
+                    
+                    if (marker.is_hq) {{
+                        // Add HQ marker - try with image first
+                        var hqIcon = L.icon({{
+                            iconUrl: '/static/windborn.png',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15],
+                            popupAnchor: [0, -15]
+                        }});
+                        L.marker([marker.lat, marker.lon], {{icon: hqIcon}})
+                         .bindPopup("Palo Alto HQ")
+                         .addTo(window.myMap)
+                         .on('error', function() {{
+                             console.log('Icon failed to load, using circle marker');
+                             // Fallback to circle if image fails
+                             L.circleMarker([marker.lat, marker.lon], {{
+                                 radius: 8,
+                                 fillColor: 'blue',
+                                 color: 'black',
+                                 weight: 2,
+                                 fillOpacity: 0.8
+                             }}).bindPopup("Palo Alto HQ").addTo(window.myMap);
+                         }});
+                    }} else {{
+                        var circleMarker = L.circleMarker([marker.lat, marker.lon], {{
+                            radius: radius,
+                            fillColor: color,
+                            color: 'black',
+                            weight: 2,
+                            fillOpacity: 0.8
+                        }}).bindPopup("Node " + marker.id + (marker.reachable ? " - Distance: " + marker.distance.toFixed(2) + " km" : ""))
+                          .bindTooltip(marker.lat + "," + marker.lon + "," + marker.alt + (marker.reachable && !marker.fcc_relay ? " - Click to show path" : ""))
+                          .addTo(window.myMap);
+                        
+                        if (marker.reachable && !marker.fcc_relay) {{
+                            circleMarker.on('click', function() {{
+                                if (pathDataLoaded) {{
+                                    window.togglePath(marker.id);
+                                }}
+                            }});
+                        }}
+                    }}
+                }});
+                console.log('Added markers:', reachableCount, 'reachable out of', markerData.length);
+                markersAdded = true;
+            }}
+            
+            window.togglePath = function(nodeId) {{
+                if (!pathDataLoaded) {{
+                    console.log('Path data not loaded yet');
+                    return;
+                }}
+                
+                if (activePaths[nodeId]) {{
+                    window.myMap.removeLayer(activePaths[nodeId]);
+                    delete activePaths[nodeId];
+                }} else {{
+                    var data = pathData[nodeId];
+                    if (data) {{
+                        var pathLine = L.polyline(data.coords, {{
+                            color: 'green',
+                            weight: 4,
+                            opacity: 0.8,
+                        }}).bindTooltip("Node " + nodeId + "<br>Distance: " + data.distance.toFixed(2) + " km<br>Path: " + data.path_str, {{sticky: true}});
+                        pathLine.addTo(window.myMap);
+                        activePaths[nodeId] = pathLine;
+                    }}
+                }}
+            }};
+            
+            // Add markers after map loads
+            setTimeout(addMarkers, 100);
         }});
     </script>
     """))
 
-    icon = folium.CustomIcon(
-        icon_image='windborn.png',  # or local path: 'my_icon.png'
-        icon_size=(30, 30),  # width, height in pixels
-        icon_anchor=(15, 15)  # anchor point, optional
-    )
-    for lat, lon, alt, id in points:
-        if math.isnan(lat) or math.isnan(lon):
-            continue
-        if(jack_start >= 0 and id >= jack_start):
-            jack = True
-        else:
-            jack = False
-        reachable = True
-        if len(distances[id][0]) == 0:
-            reachable = False
-        if(id == 0):
-            folium.Marker(
-            location=[lat, lon],
-            icon=icon,
-            fill=True,
-            fill_color='blue' if reachable else 'red',
-            color="black",
-            fill_opacity=0.8,
-            popup="Palo Alto HQ"
-            ).add_to(m)
-            continue
-        path_coords = [[points[n][0], points[n][1]] for n in distances[id][0] + [id]]
-        path_json = json.dumps(path_coords)
-
-        # Add visible marker
-        folium.CircleMarker(
-            location=[lat, lon],
-            radius=1 if jack else 5,
-            fill=True,
-            fill_color='blue' if reachable else 'red',
-            color='black',
-            thickness=2,
-            fill_opacity=0.8,
-            popup=f"Node {id}",
-            tooltip=f"{lat},{lon},{alt}"
-        ).add_to(m)
-        if(reachable):
-        # Inject JS for path toggle on click
-            path_nodes = distances[id][0] + [id]
-            path_str = " > ".join([f"Node {n}" for n in path_nodes])
-            js = f"""
-            <script>
-            setTimeout(function() {{
-                var pathLine_{id} = L.polyline({path_json}, {{
-                    color: 'green',
-                    weight: 4,
-                    opacity: 0.8,
-                }}).bindTooltip("Node {id}<br>Distance: {distances[id][1]:.2f} km<br>Path: {path_str}", {{sticky: true}});
-                var trigger = L.circleMarker({json.dumps([lat, lon])}, {{
-                    radius: 10,
-                    opacity: 0,
-                    fillOpacity: 0
-                }}).addTo(window.myMap);
-                trigger.on('click', function () {{
-                    if (window.myMap.hasLayer(pathLine_{id})) {{
-                        window.myMap.removeLayer(pathLine_{id});
-                    }} else {{
-                        pathLine_{id}.addTo(window.myMap);
-                    }}
-                }});
-            }}, 100);
-            </script>
-            """
-            m.get_root().html.add_child(Element(js))
     return m
 
 
@@ -239,13 +303,24 @@ def add_markers(points, distances, jack_start, only_land = True):
 
 app = Flask(__name__)
 
+# Global variables to store current session data
+current_path_data = {}
+current_points = []
+
+@app.route("/api/paths")
+def get_paths():
+    """API endpoint to return path data as JSON"""
+    return current_path_data
+
 @app.route("/")
 def index():
+    global current_path_data, current_points
+    
     max_range = int(request.args.get("value", 500))
     hour_value = int(request.args.get("hour", 0))
     jack_enabled = request.args.get("jack", "0") == "1"
 
-    points, distances,jack_start = get_distances(max_range, hour_value, jack_enabled)
+    points, distances, fcc_start = get_distances(max_range, hour_value, jack_enabled)
     if(len(points) == 0):
          return render_template("index.html",
                                map_html="",
@@ -253,12 +328,96 @@ def index():
                                initial_hour=hour_value,
                                error_message="Error in loading JSON data for specified hour, try again later or try with different hour.",
                                jack_enabled=jack_enabled)
-    m = add_markers(points, distances,jack_start)
-
+    
+    # Store data globally for API access
+    current_points = points
+    current_path_data = {}
+    
+    # Load FCC facility names for better path descriptions
+    fcc_facility_names = {}
+    if fcc_start >= 0:
+        with open("fcc_facilities.json", "r") as f:
+            fcc_facilities = json.load(f)
+        for i, facility in enumerate(fcc_facilities):
+            facility_id = fcc_start + i
+            # Extract short name from location
+            short_name = facility['name'].split(' - ')[0]  # e.g. "New York, NY"
+            fcc_facility_names[facility_id] = f"{facility['type']} ({short_name})"
+    
+    for i, (lat, lon, alt, id) in enumerate(points):
+        if id == 0 or len(distances[id][0]) == 0:
+            continue
+        path_coords = [[points[n][0], points[n][1]] for n in distances[id][0] + [id]]
+        path_nodes = distances[id][0] + [id]
+        
+        # Create descriptive path string
+        path_labels = []
+        for n in path_nodes:
+            if n == 0:
+                path_labels.append("HQ")
+            elif n in fcc_facility_names:
+                path_labels.append(fcc_facility_names[n])
+            else:
+                path_labels.append(f"Satellite {n}")
+        
+        path_str = " > ".join(path_labels)
+        current_path_data[id] = {
+            'coords': path_coords,
+            'distance': distances[id][1],
+            'path_str': path_str,
+            'lat': lat,
+            'lon': lon
+        }
+    
+    m = add_markers(points, distances, fcc_start)
 
     # Save or display
     map_html = m._repr_html_()
-    return render_template("index.html", map_html=map_html, initial_value=max_range, initial_hour=hour_value, error_message=None,jack_enabled=jack_enabled)
+    
+    # Calculate network performance metrics
+    total_satellites = len([p for p in points if p[3] != 0 and (fcc_start == -1 or p[3] < fcc_start)])
+    total_fcc_relays = len([p for p in points if fcc_start != -1 and p[3] >= fcc_start])
+    reachable_satellites = len([id for id in current_path_data.keys() if id != 0 and (fcc_start == -1 or id < fcc_start)])
+    
+    # Calculate average hop count
+    if current_path_data:
+        hop_counts = [len(data['coords']) - 1 for data in current_path_data.values()]
+        avg_hops = sum(hop_counts) / len(hop_counts)
+        max_hops = max(hop_counts) if hop_counts else 0
+        min_hops = min(hop_counts) if hop_counts else 0
+    else:
+        avg_hops = max_hops = min_hops = 0
+    
+    # Calculate network coverage percentage
+    coverage_percent = (reachable_satellites / total_satellites * 100) if total_satellites > 0 else 0
+    
+    # Find longest and shortest distances
+    if current_path_data:
+        distances_km = [data['distance'] for data in current_path_data.values()]
+        max_distance = max(distances_km) if distances_km else 0
+        min_distance = min(distances_km) if distances_km else 0
+        avg_distance = sum(distances_km) / len(distances_km) if distances_km else 0
+    else:
+        max_distance = min_distance = avg_distance = 0
+    
+    network_metrics = {
+        'total_satellites': total_satellites,
+        'total_fcc_relays': total_fcc_relays,
+        'reachable_satellites': reachable_satellites,
+        'coverage_percent': round(coverage_percent, 1),
+        'avg_hops': round(avg_hops, 1),
+        'max_hops': max_hops,
+        'min_hops': min_hops,
+        'max_distance': round(max_distance, 1),
+        'min_distance': round(min_distance, 1),
+        'avg_distance': round(avg_distance, 1)
+    }
+    
+    # Debug: Check HTML size and distances
+    html_lines = len(map_html.split('\n'))
+    print(f"Generated HTML has {html_lines} lines, {total_satellites} satellites, {reachable_satellites} reachable")
+    
+    return render_template("index.html", map_html=map_html, initial_value=max_range, initial_hour=hour_value, error_message=None, jack_enabled=jack_enabled, metrics=network_metrics)
 
-# if __name__ == "__main__":
-#     app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
