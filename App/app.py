@@ -221,15 +221,16 @@ def add_markers(points, distances, fcc_start, only_land = True):
                     if (marker.reachable) reachableCount++;
                     
                     if (marker.is_hq) {{
-                        // Add HQ marker - try with image first
-                        // Use a more distinctive HQ marker
-                        L.circleMarker([marker.lat, marker.lon], {{
-                            radius: 12,
-                            fillColor: '#FFD700',
-                            color: 'black',
-                            weight: 3,
-                            fillOpacity: 0.9
-                        }}).bindPopup("🏢 Palo Alto HQ").addTo(window.myMap);
+                        // Add HQ marker with windborn.png icon
+                        var hqIcon = L.icon({{
+                            iconUrl: '/static/windborn.png',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15],
+                            popupAnchor: [0, -15]
+                        }});
+                        L.marker([marker.lat, marker.lon], {{icon: hqIcon}})
+                         .bindPopup("Palo Alto HQ")
+                         .addTo(window.myMap);
                     }} else {{
                         var circleMarker = L.circleMarker([marker.lat, marker.lon], {{
                             radius: radius,
@@ -410,4 +411,4 @@ def index():
     return render_template("index.html", map_html=map_html, initial_value=max_range, initial_hour=hour_value, error_message=None, jack_enabled=jack_enabled, metrics=network_metrics)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
