@@ -1,10 +1,10 @@
 from flask import Flask, render_template,request
 import folium
-import requests
-from folium import IFrame
 from folium import Element
-import geopandas as gpd
-from shapely.geometry import Point
+# Removed heavy imports for performance:
+import requests  # Needed for satellite API calls
+# import geopandas as gpd  # Heavy geospatial library - disabled
+# from shapely.geometry import Point  # Not used with land checking disabled
 import time
 import json
 import re
@@ -26,12 +26,14 @@ def get_distances(max_distance, hour, jack_enabled):
         x2, y2, z2 = to_xyz(point2[0],point2[1], point2[2])
         return math.sqrt((x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2)
 
-    # Load land polygons from Natural Earth
-    land = gpd.read_file("natural_earth_land/ne_110m_land.shp")
+    # Skip land checking for performance - comment out for production use
+    # land = gpd.read_file("natural_earth_land/ne_110m_land.shp") 
 
     def is_on_land(lat, lon):
-        point = Point(lon, lat)
-        return any(land.geometry.contains(point))
+        # Disabled for performance - always return True
+        return True
+        # point = Point(lon, lat)
+        # return any(land.geometry.contains(point))
 
 
 
@@ -220,26 +222,14 @@ def add_markers(points, distances, fcc_start, only_land = True):
                     
                     if (marker.is_hq) {{
                         // Add HQ marker - try with image first
-                        var hqIcon = L.icon({{
-                            iconUrl: '/static/windborn.png',
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 15],
-                            popupAnchor: [0, -15]
-                        }});
-                        L.marker([marker.lat, marker.lon], {{icon: hqIcon}})
-                         .bindPopup("Palo Alto HQ")
-                         .addTo(window.myMap)
-                         .on('error', function() {{
-                             console.log('Icon failed to load, using circle marker');
-                             // Fallback to circle if image fails
-                             L.circleMarker([marker.lat, marker.lon], {{
-                                 radius: 8,
-                                 fillColor: 'blue',
-                                 color: 'black',
-                                 weight: 2,
-                                 fillOpacity: 0.8
-                             }}).bindPopup("Palo Alto HQ").addTo(window.myMap);
-                         }});
+                        // Use a more distinctive HQ marker
+                        L.circleMarker([marker.lat, marker.lon], {{
+                            radius: 12,
+                            fillColor: '#FFD700',
+                            color: 'black',
+                            weight: 3,
+                            fillOpacity: 0.9
+                        }}).bindPopup("🏢 Palo Alto HQ").addTo(window.myMap);
                     }} else {{
                         var circleMarker = L.circleMarker([marker.lat, marker.lon], {{
                             radius: radius,
