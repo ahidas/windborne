@@ -208,7 +208,7 @@ def save_fcc_data(facilities: List[Dict], filename: str = "fcc_facilities.json")
     """
     Save the processed FCC facility data to JSON file.
     """
-    filepath = f"/workspaces/ubuntu-2/App/{filename}"
+    filepath = filename
     
     with open(filepath, 'w') as f:
         json.dump(facilities, f, indent=2)

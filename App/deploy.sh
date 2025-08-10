@@ -49,8 +49,7 @@ fi
 
 # Install system dependencies
 print_status "📦 Installing system dependencies..."
-sudo apt update -qq
-sudo apt install -y python3-venv python3-pip wget curl
+brew update -qq
 
 # Create virtual environment
 print_status "🐍 Setting up Python virtual environment..."
@@ -77,7 +76,7 @@ if [ ! -f "ngrok" ]; then
 fi
 
 # Configure ngrok with auth token
-./ngrok config add-authtoken "$NGROK_TOKEN"
+ngrok config add-authtoken "$NGROK_TOKEN"
 print_success "ngrok configured with auth token"
 
 # Create startup script
