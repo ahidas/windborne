@@ -1,6 +1,6 @@
-# Windborne Satellite Network Analyzer
+# Windborne Balloon Network Analyzer
 
-Real-time satellite network visualization with optimal routing analysis using Dijkstra's algorithm and FCC communication infrastructure.
+Real-time balloon network visualization with optimal routing analysis using Dijkstra's algorithm and FCC communication infrastructure.
 
 ## 🚀 Quick Deploy (New Computer)
 
@@ -27,9 +27,9 @@ cd App/
 
 ## ✨ Features
 
-- **🛰️ Real-time Satellite Tracking**: Live positions from Windborne treasure hunt API
+- **🎈 Real-time Balloon Tracking**: Live positions from Windborne treasure hunt API
 - **📡 FCC Communication Relays**: 20+ real antenna structures for multi-hop routing  
-- **🗺️ Interactive Network Map**: Click satellites to show optimal paths to HQ
+- **🗺️ Interactive Network Map**: Click balloons to show optimal paths to HQ
 - **📊 Performance Metrics**: Network coverage, hop counts, distances
 - **⚡ Dijkstra Pathfinding**: Optimal routing with 3D distance calculations
 
@@ -57,7 +57,7 @@ cd App/
 1. **Adjust Range**: Set max communication distance (0-1000km)
 2. **Select Time**: Historical positions (0-23 hours ago)  
 3. **Toggle Relays**: Include FCC communication infrastructure
-4. **Click Satellites**: View optimal routing paths to Palo Alto HQ
+4. **Click Balloons**: View optimal routing paths to Palo Alto HQ
 5. **View Metrics**: Real-time network performance statistics
 
 ## 🔧 Development
@@ -77,13 +77,13 @@ python app.py
 ## 📊 Network Metrics
 
 The application provides real-time analysis of:
-- Satellite coverage percentage
+- Balloon coverage percentage
 - Average communication hops
 - Network routing efficiency  
 - FCC relay utilization
 - Distance optimization
 
-Perfect for demonstrating satellite constellation management and network topology optimization.
+Perfect for demonstrating balloon constellation management and network topology optimization.
 
 ---
-*Built for Windborne Systems - Advanced satellite network analysis*
+*Built for Windborne Systems - Advanced balloon network analysis*

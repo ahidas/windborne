@@ -2,7 +2,7 @@
   {
     "lat": 40.7589,
     "lon": -73.9851,
-    "name": "New York, NY - Satellite Uplink Facility",
+    "name": "New York, NY - Balloon Uplink Facility",
     "callsign": "KA2XYZ",
     "type": "Earth Station",
     "height": 150
@@ -10,7 +10,7 @@
   {
     "lat": 39.0458,
     "lon": -76.6413,
-    "name": "Baltimore, MD - NOAA Satellite Ground Station",
+    "name": "Baltimore, MD - NOAA Balloon Ground Station",
     "callsign": "WB3ABC",
     "type": "Earth Station",
     "height": 200
@@ -26,7 +26,7 @@
   {
     "lat": 34.0522,
     "lon": -118.2437,
-    "name": "Los Angeles, CA - Media Satellite Facility",
+    "name": "Los Angeles, CA - Media Balloon Facility",
     "callsign": "W6GHI",
     "type": "Earth Station",
     "height": 250
@@ -58,7 +58,7 @@
   {
     "lat": 47.6062,
     "lon": -122.3321,
-    "name": "Seattle, WA - Pacific Maritime Satellite Station",
+    "name": "Seattle, WA - Pacific Maritime Balloon Station",
     "callsign": "WA7STU",
     "type": "Earth Station",
     "height": 160
@@ -74,7 +74,7 @@
   {
     "lat": 39.7392,
     "lon": -104.9903,
-    "name": "Denver, CO - Mountain West Satellite Facility",
+    "name": "Denver, CO - Mountain West Balloon Facility",
     "callsign": "W0YZA",
     "type": "Earth Station",
     "height": 240
@@ -98,7 +98,7 @@
   {
     "lat": 39.9526,
     "lon": -75.1652,
-    "name": "Philadelphia, PA - East Coast Satellite Hub",
+    "name": "Philadelphia, PA - East Coast Balloon Hub",
     "callsign": "W3HIJ",
     "type": "Earth Station",
     "height": 165
@@ -106,7 +106,7 @@
   {
     "lat": 61.2181,
     "lon": -149.9003,
-    "name": "Anchorage, AK - Arctic Satellite Gateway",
+    "name": "Anchorage, AK - Arctic Balloon Gateway",
     "callsign": "KL7KLM",
     "type": "Earth Station",
     "height": 195
@@ -114,7 +114,7 @@
   {
     "lat": 21.3099,
     "lon": -157.8581,
-    "name": "Honolulu, HI - Pacific Satellite Station",
+    "name": "Honolulu, HI - Pacific Balloon Station",
     "callsign": "WH6NOP",
     "type": "Earth Station",
     "height": 155
@@ -130,7 +130,7 @@
   {
     "lat": 32.7157,
     "lon": -117.1611,
-    "name": "San Diego, CA - Southern California Satellite Facility",
+    "name": "San Diego, CA - Southern California Balloon Facility",
     "callsign": "W6TUV",
     "type": "Earth Station",
     "height": 175
@@ -154,7 +154,7 @@
   {
     "lat": 45.5152,
     "lon": -122.6784,
-    "name": "Portland, OR - Northwest Satellite Station",
+    "name": "Portland, OR - Northwest Balloon Station",
     "callsign": "W7CDE",
     "type": "Earth Station",
     "height": 185

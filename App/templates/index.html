@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windborne Satellite Network Analyzer</title>
+    <title>Windborne Balloon Network Analyzer</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23007BFF'/><circle cx='16' cy='16' r='8' fill='white'/><circle cx='16' cy='16' r='3' fill='%23007BFF'/></svg>" type="image/svg+xml">
     <style>
         body {
@@ -211,7 +211,7 @@
 
     <div class="loading" id="loading">
         <div class="spinner"></div>
-        <p>Loading satellite network data...</p>
+        <p>Loading balloon network data...</p>
     </div>
     
     {% if error_message %}
@@ -226,17 +226,17 @@
 </div>
 
 <div class="sidebar">
-    <h3>🛰️ Windborne Satellite Network</h3>
+    <h3>🎈 Windborne Balloon Network</h3>
     
     <h4>Purpose</h4>
-    <p>This tool visualizes which satellites are within communication range of Windborne's Palo Alto headquarters and shows optimal routing paths between network nodes.</p>
+    <p>This tool visualizes which balloons are within communication range of Windborne's Palo Alto headquarters and shows optimal routing paths between network nodes.</p>
     
     <h4>Controls</h4>
-    <p><strong>Balloon Range (0-1000 km):</strong> Maximum communication distance between any two satellites. Determines network connectivity - higher values connect more distant satellites.</p>
+    <p><strong>Balloon Range (0-1000 km):</strong> Maximum communication distance between any two balloons. Determines network connectivity - higher values connect more distant balloons.</p>
     
-    <p><strong>Hours Ago (0-23):</strong> Historical satellite positions from the Windborne treasure hunt API. Shows network topology at different times.</p>
+    <p><strong>Hours Ago (0-23):</strong> Historical balloon positions from the Windborne treasure hunt API. Shows network topology at different times.</p>
     
-    <p><strong>FCC Communication Relays:</strong> Includes FCC-registered antenna structures (earth stations, microwave towers) as realistic ground-based relay points for multi-hop satellite communication.</p>
+    <p><strong>FCC Communication Relays:</strong> Includes FCC-registered antenna structures (earth stations, microwave towers) as realistic ground-based relay points for multi-hop balloon communication.</p>
     
     <h4>Map Legend</h4>
     <div class="legend">
@@ -245,11 +245,11 @@
     </div>
     <div class="legend">
         <div class="legend-dot blue"></div>
-        <span>Reachable satellites (click to show path)</span>
+        <span>Reachable balloons (click to show path)</span>
     </div>
     <div class="legend">
         <div class="legend-dot red"></div>
-        <span>Unreachable satellites</span>
+        <span>Unreachable balloons</span>
     </div>
     <div class="legend">
         <div class="legend-dot blue" style="width: 8px; height: 8px;"></div>
@@ -281,7 +281,7 @@
     <h4>📊 Network Performance</h4>
     {% if metrics %}
     <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 12px;">
-        <p><strong>Satellites:</strong> {{ metrics.reachable_satellites }}/{{ metrics.total_satellites }} reachable</p>
+        <p><strong>Balloons:</strong> {{ metrics.reachable_balloons }}/{{ metrics.total_balloons }} reachable</p>
         <p><strong>Coverage:</strong> {{ metrics.coverage_percent }}% of network</p>
         {% if metrics.total_fcc_relays > 0 %}
         <p><strong>FCC Relays:</strong> {{ metrics.total_fcc_relays }} active</p>
@@ -295,8 +295,8 @@
     
     <h4>How to Use</h4>
     <p>1. Adjust the range slider to see how communication distance affects network connectivity</p>
-    <p>2. Use the time slider to explore historical satellite positions</p>
-    <p>3. Click blue satellites to visualize optimal communication paths to HQ</p>
+    <p>2. Use the time slider to explore historical balloon positions</p>
+    <p>3. Click blue balloons to visualize optimal communication paths to HQ</p>
     <p>4. FCC relay stations (smaller dots) provide intermediate hops for long-distance routing</p>
 </div>
 

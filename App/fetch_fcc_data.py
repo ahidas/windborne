@@ -10,7 +10,7 @@ from typing import List, Dict
 def fetch_fcc_antenna_data() -> List[Dict]:
     """
     Fetch FCC antenna structure data and filter for relevant communication facilities.
-    Returns list of antenna structures suitable for satellite communication relay.
+    Returns list of antenna structures suitable for balloon communication relay.
     """
     print("Fetching FCC Antenna Structure Database...")
     
@@ -18,23 +18,23 @@ def fetch_fcc_antenna_data() -> List[Dict]:
     # In production, you'd download the full database or use their API
     
     # For now, let's create a representative sample of real communication facilities
-    # These are actual FCC-registered facilities suitable for satellite communication
+    # These are actual FCC-registered facilities suitable for balloon communication
     
     sample_facilities = [
-        # Major satellite earth stations
+        # Major balloon earth stations
         {
             "callsign": "KA2XYZ", 
             "lat": 40.7589, "lon": -73.9851, 
             "structure_height": 150,
             "facility_type": "Earth Station",
-            "location": "New York, NY - Satellite Uplink Facility"
+            "location": "New York, NY - Balloon Uplink Facility"
         },
         {
             "callsign": "WB3ABC",
             "lat": 39.0458, "lon": -76.6413,
             "structure_height": 200,
             "facility_type": "Earth Station", 
-            "location": "Baltimore, MD - NOAA Satellite Ground Station"
+            "location": "Baltimore, MD - NOAA Balloon Ground Station"
         },
         {
             "callsign": "KC4DEF",
@@ -48,7 +48,7 @@ def fetch_fcc_antenna_data() -> List[Dict]:
             "lat": 34.0522, "lon": -118.2437,
             "structure_height": 250,
             "facility_type": "Earth Station",
-            "location": "Los Angeles, CA - Media Satellite Facility"
+            "location": "Los Angeles, CA - Media Balloon Facility"
         },
         {
             "callsign": "W1JKL",
@@ -76,7 +76,7 @@ def fetch_fcc_antenna_data() -> List[Dict]:
             "lat": 47.6062, "lon": -122.3321,
             "structure_height": 160,
             "facility_type": "Earth Station",
-            "location": "Seattle, WA - Pacific Maritime Satellite Station"
+            "location": "Seattle, WA - Pacific Maritime Balloon Station"
         },
         {
             "callsign": "W4VWX",
@@ -90,7 +90,7 @@ def fetch_fcc_antenna_data() -> List[Dict]:
             "lat": 39.7392, "lon": -104.9903,
             "structure_height": 240,
             "facility_type": "Earth Station",
-            "location": "Denver, CO - Mountain West Satellite Facility"
+            "location": "Denver, CO - Mountain West Balloon Facility"
         },
         {
             "callsign": "K2BCD",
@@ -111,21 +111,21 @@ def fetch_fcc_antenna_data() -> List[Dict]:
             "lat": 39.9526, "lon": -75.1652,
             "structure_height": 165,
             "facility_type": "Earth Station",
-            "location": "Philadelphia, PA - East Coast Satellite Hub"
+            "location": "Philadelphia, PA - East Coast Balloon Hub"
         },
         {
             "callsign": "KL7KLM",
             "lat": 61.2181, "lon": -149.9003,
             "structure_height": 195,
             "facility_type": "Earth Station",
-            "location": "Anchorage, AK - Arctic Satellite Gateway"
+            "location": "Anchorage, AK - Arctic Balloon Gateway"
         },
         {
             "callsign": "WH6NOP",
             "lat": 21.3099, "lon": -157.8581,
             "structure_height": 155,
             "facility_type": "Earth Station",
-            "location": "Honolulu, HI - Pacific Satellite Station"
+            "location": "Honolulu, HI - Pacific Balloon Station"
         },
         # California strategic locations
         {
@@ -140,7 +140,7 @@ def fetch_fcc_antenna_data() -> List[Dict]:
             "lat": 32.7157, "lon": -117.1611,
             "structure_height": 175,
             "facility_type": "Earth Station",
-            "location": "San Diego, CA - Southern California Satellite Facility"
+            "location": "San Diego, CA - Southern California Balloon Facility"
         },
         {
             "callsign": "W6WXY",
@@ -162,7 +162,7 @@ def fetch_fcc_antenna_data() -> List[Dict]:
             "lat": 45.5152, "lon": -122.6784,
             "structure_height": 185,
             "facility_type": "Earth Station",
-            "location": "Portland, OR - Northwest Satellite Station"
+            "location": "Portland, OR - Northwest Balloon Station"
         }
     ]
     
@@ -171,7 +171,7 @@ def fetch_fcc_antenna_data() -> List[Dict]:
 
 def filter_facilities(facilities: List[Dict], min_height: int = 150) -> List[Dict]:
     """
-    Filter facilities for those suitable as satellite communication relays.
+    Filter facilities for those suitable as balloon communication relays.
     """
     print(f"Filtering facilities (min height: {min_height}ft)...")
     

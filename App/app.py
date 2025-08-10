@@ -2,7 +2,7 @@ from flask import Flask, render_template,request
 import folium
 from folium import Element
 # Removed heavy imports for performance:
-import requests  # Needed for satellite API calls
+import requests  # Needed for balloon API calls
 # import geopandas as gpd  # Heavy geospatial library - disabled
 # from shapely.geometry import Point  # Not used with land checking disabled
 import time
@@ -349,7 +349,7 @@ def index():
             elif n in fcc_facility_names:
                 path_labels.append(fcc_facility_names[n])
             else:
-                path_labels.append(f"Satellite {n}")
+                path_labels.append(f"Balloon {n}")
         
         path_str = " > ".join(path_labels)
         current_path_data[id] = {
@@ -366,9 +366,9 @@ def index():
     map_html = m._repr_html_()
     
     # Calculate network performance metrics
-    total_satellites = len([p for p in points if p[3] != 0 and (fcc_start == -1 or p[3] < fcc_start)])
+    total_balloons = len([p for p in points if p[3] != 0 and (fcc_start == -1 or p[3] < fcc_start)])
     total_fcc_relays = len([p for p in points if fcc_start != -1 and p[3] >= fcc_start])
-    reachable_satellites = len([id for id in current_path_data.keys() if id != 0 and (fcc_start == -1 or id < fcc_start)])
+    reachable_balloons = len([id for id in current_path_data.keys() if id != 0 and (fcc_start == -1 or id < fcc_start)])
     
     # Calculate average hop count
     if current_path_data:
@@ -380,7 +380,7 @@ def index():
         avg_hops = max_hops = min_hops = 0
     
     # Calculate network coverage percentage
-    coverage_percent = (reachable_satellites / total_satellites * 100) if total_satellites > 0 else 0
+    coverage_percent = (reachable_balloons / total_balloons * 100) if total_balloons > 0 else 0
     
     # Find longest and shortest distances
     if current_path_data:
@@ -392,9 +392,9 @@ def index():
         max_distance = min_distance = avg_distance = 0
     
     network_metrics = {
-        'total_satellites': total_satellites,
+        'total_balloons': total_balloons,
         'total_fcc_relays': total_fcc_relays,
-        'reachable_satellites': reachable_satellites,
+        'reachable_balloons': reachable_balloons,
         'coverage_percent': round(coverage_percent, 1),
         'avg_hops': round(avg_hops, 1),
         'max_hops': max_hops,
@@ -406,7 +406,7 @@ def index():
     
     # Debug: Check HTML size and distances
     html_lines = len(map_html.split('\n'))
-    print(f"Generated HTML has {html_lines} lines, {total_satellites} satellites, {reachable_satellites} reachable")
+    print(f"Generated HTML has {html_lines} lines, {total_balloons} balloons, {reachable_balloons} reachable")
     
     return render_template("index.html", map_html=map_html, initial_value=max_range, initial_hour=hour_value, error_message=None, jack_enabled=jack_enabled, metrics=network_metrics)
 

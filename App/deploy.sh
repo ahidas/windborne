@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Windborne Satellite Network Analyzer - Auto Deploy Script
+# Windborne Balloon Network Analyzer - Auto Deploy Script
 # Usage: ./deploy.sh YOUR_NGROK_AUTH_TOKEN
 
 set -e  # Exit on any error
@@ -39,7 +39,7 @@ fi
 NGROK_TOKEN="$1"
 APP_PORT="5001"
 
-print_status "🚀 Starting Windborne Satellite Network Analyzer deployment..."
+print_status "🚀 Starting Windborne Balloon Network Analyzer deployment..."
 
 # Check if we're in the right directory
 if [ ! -f "app.py" ]; then
@@ -90,7 +90,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${BLUE}🛰️  Starting Windborne Satellite Network Analyzer...${NC}"
+echo -e "${BLUE}🎈 Starting Windborne Balloon Network Analyzer...${NC}"
 
 # Start Flask app in background
 echo -e "${BLUE}[1/2]${NC} Starting Flask application on port 5001..."
@@ -120,7 +120,7 @@ if [ ! -z "$PUBLIC_URL" ]; then
     echo -e "${BLUE}💻 Local URL:  http://localhost:5001${NC}"
     echo ""
     echo -e "${YELLOW}📊 Features available:${NC}"
-    echo "   • Real-time satellite network visualization"
+    echo "   • Real-time balloon network visualization"
     echo "   • FCC communication relay integration"
     echo "   • Network performance metrics"
     echo "   • Interactive path routing"
@@ -149,7 +149,7 @@ chmod +x start_app.sh
 # Create stop script
 cat > stop_app.sh << 'EOF'
 #!/bin/bash
-echo "🛑 Stopping Windborne Satellite Network Analyzer..."
+echo "🛑 Stopping Windborne Balloon Network Analyzer..."
 
 # Kill processes from .env if it exists
 if [ -f ".env" ]; then
